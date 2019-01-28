@@ -3,3 +3,6 @@ I'm quite into Docker and Kubernetes, and have some IaaS resource at hand. So I 
 
 # Project Structure
 Each folder describes one key step of my Kubernetes configuration, with a document and all the relevant source code.
+
+# Tested Kubernetes Version
+v1.13.2
