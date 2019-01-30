@@ -68,3 +68,15 @@ Change `type: ClusterIP` to `type: NodePort` and save file.
 ## Ingress
 
 Will be introduced in the upcoming part.
+
+# Admin Privileges
+
+**IMPORTANT:** Make sure that you know what you are doing before proceeding. Granting admin privileges to Dashboard's Service Account might be a security risk.
+
+You can grant full admin privileges to Dashboard's Service Account by creating below ClusterRoleBinding.
+
+```
+$ kubectl create serviceaccount cluster-admin-dashboard-sa
+$ kubectl create clusterrolebinding cluster-admin-dashboard-sa --clusterrole=cluster-admin --serviceaccount=default:cluster-admin-dashboard-sa
+```
+*ClusterRole cluster-admin should already exist since we use kubeadm to setup the cluster*
