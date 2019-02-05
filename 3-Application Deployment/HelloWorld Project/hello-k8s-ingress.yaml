@@ -1,0 +1,13 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: hello-k8s-ingress
+  namespace: default
+spec:
+  rules:
+  - host: REPLACE_WITH_YOUR_DOMAIN_NAME
+    http:
+      paths:
+      - backend:
+          serviceName: hello-k8s
+          servicePort: 8888
