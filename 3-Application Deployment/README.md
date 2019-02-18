@@ -24,3 +24,12 @@ NAME        READY   UP-TO-DATE   AVAILABLE   AGE
 hello-k8s   1/1     1            1           17d
 ```
 
+### Create a Service
+
+By default, the Pod is only accessible by its internal IP address within the Kubernetes cluster. To make the `hello-k8s` container accessible from outside the Kubernetes virtual network, you have to expose the Pod as a Kubernetes Service.
+
+```
+kubectl expose deployment hello-k8s --port=8888
+```
+
+The type of this deployment is `ClusterIP` by default, after creating it you could use the file `hello-k8s-ingress.yaml` to create an ingress for the application.
