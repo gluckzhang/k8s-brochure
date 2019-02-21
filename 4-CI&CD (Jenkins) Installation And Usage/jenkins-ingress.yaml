@@ -1,0 +1,16 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: jenkins-ingress
+  namespace: kube-ops
+  annotations:
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      proxy_set_header X-Forwarded-Proto https;
+spec:
+  rules:
+  - host: jenkins.kth-assert.net
+    http:
+      paths:
+      - backend:
+          serviceName: jenkins
+          servicePort: 8080
