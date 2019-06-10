@@ -1,0 +1,9 @@
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: NAMESPACE_USERNAME-admin
+  namespace: NAMESPACE_NAME
+rules:
+- apiGroups: ["", "extensions", "apps","rbac.authorization.k8s.io","authentication.k8s.io","batch","certificates.k8s.io","events.k8s.io","scheduling.k8s.io","storage.k8s.io"]
+  resources: ["*"]
+  verbs: ["*"]
