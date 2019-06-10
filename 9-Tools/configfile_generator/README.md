@@ -145,7 +145,11 @@ namespace_name can be found with
 username depends on which method you use. If it's the "create" method then it will be "namespace_name-user" otherwise if it's the "createEx" then in the right namespace the service account is in(you have to , it can be found with
 * kubectl get sa
 
+## Apply ResourcesQuota yaml over multiple namespace in one line
 
+* python ConstructAccess limitRes --rlpath filepath namespace1 namespace2 ... namespaceN
+
+Here "filepath" is the path of the yaml file for restricting resources in the mentioned namespaces. Check templates to have a look at "quota-mem-cpu.yaml" as an example of such file. 
 
 
 
