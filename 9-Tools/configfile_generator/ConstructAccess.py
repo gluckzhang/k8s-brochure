@@ -65,7 +65,7 @@ def create_config(namespace_name,namespace_username):
 
 	# Insert provided value in kubeconfigform
 	config_file_name = namespace_username + "config"
-	exec_get_output(["cp","./forms/kubeconfigform",config_file_name])
+	exec_get_output(["cp","./templates/kubeconfigform",config_file_name])
 
 	replace_with_input(config_file_name,namespace_name,"NAMESPACE_NAME")
 	replace_with_input(config_file_name,namespace_username,"NAMESPACE_USERNAME")
@@ -84,12 +84,12 @@ def create_config(namespace_name,namespace_username):
 # This create namespace, service account, role , rolebindings and create a config file based on those infos.
 # accesskind is either admin, user or viewer (check repo for more detailed what they do)
 def generate_new_config(namespace_name,namespace_username,action,accesskind="",role_file_path="",resourcelimitfilepath=""):
-	# copy from the forms then replace the name of role referred in rolebinding.yaml.
-	exec_get_output(["cp","./forms/rolebinding.yaml","./"])
+	# copy from the templates then replace the name of role referred in rolebinding.yaml.
+	exec_get_output(["cp","./templates/rolebinding.yaml","./"])
 
 	# use ruamel.yaml to take the name field from role.yaml to rolebindings
 	if role_file_path=="":
-		role_file_path = './forms/role-' + accesskind +'.yaml'  ## Read the Yaml File
+		role_file_path = './templates/role-' + accesskind +'.yaml'  ## Read the Yaml File
 		access_file_name = "access-" + namespace_name + "-" + namespace_username + "-" + accesskind +".yaml"
 	else:
 		access_file_name = "access-" + namespace_name + "-" + namespace_username + "-Custom"  +".yaml"
@@ -110,7 +110,7 @@ def generate_new_config(namespace_name,namespace_username,action,accesskind="",r
 	writefile.close()
 
 	# After editing with ruamel.yaml merge everything to a single file and apply.
-	merge_files(['./forms/sa.yaml', role_file_path, 'rolebinding.yaml'],access_file_name)
+	merge_files(['./templates/sa.yaml', role_file_path, 'rolebinding.yaml'],access_file_name)
 
 	# Replace namespace_name in access.yaml with input provided.
 	replace_with_input(access_file_name,namespace_name,"NAMESPACE_NAME")
