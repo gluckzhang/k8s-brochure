@@ -5,10 +5,39 @@ import getopt # for better params input handling instead of directly using argv.
 from collections import OrderedDict # For using Ordered dict
 from ruamel.yaml import YAML #To create YAML File and Read YAML File
 
+
+## Textcolors
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
 ## Global variable
 args = []
 opts = []
 optsdict = {}
+all_access_kinds = ["admin","user","viewer"]
+# this is for case8, also known as the help function or printing out the correct text at a certain error.
+ErrorSyntax = {"create": "create -a access_kind namespace1 ... namespaceN",
+	"createEx": "createEx -n namespace_name -a access_kind username1  ... usernameN",
+	"createCustomRole": "createCustomRole -r role_file_path namespace1 ... namepspaceN",
+	"createExCustomeRole": "createExCustomeRole -n namespace_name -r role_file_path username1 .... usernameN",
+	"recreate": "recreate -n namespace_name username1 ... usernameN",
+	"limit": "limit -l ResourceQuotafilepath namespace1 ... namespaceN"
+	}
+ErrorDescription = {"create": "  Description: Create config for N namespaces with N users of access_kind\n",
+	"createEx": "  Description: Create config for N users of access_kind in namespace namespace_name\n",
+	"createCustomRole": "  Description: Create config for N namespaces with N users of custom access\n",
+	"createExCustomeRole": "  Description: Create config for N users of custom access in namespace namespace_name\n",
+	"recreate": "  Description: Re-fetch config file for N users in namespace namespace_name\n",
+	"limit": "  Description: Limit resource with resource-quota-yaml-file on N namespaces\n"
+	}
+
 
 
 ## Global functions
@@ -35,7 +64,7 @@ def replace_with_input(filename,input,string_to_replace):
 	
 
 # Merge yaml file together separating with ---, 
-# this is meant for constructing the access--nsname-username-accesskind.yaml by merging
+# this is meant for constructing the access--nsname-username-access_kind.yaml by merging
 # sa.yaml, role.yaml and rolebinding.yaml
 def merge_files(filenames,outfile_name):
 	with open(outfile_name, 'w') as outfile:
@@ -77,20 +106,20 @@ def create_config(namespace_name,namespace_username):
 	replace_with_input(config_file_name,cluster_name,"CLUSTERNAME")
 
 	#Success message
-	print("SYSTEM MESSAGE:")
-	print("Config file for namespace " + namespace_name + " at cluster " + cluster_name + " is created\n")
+	print(bcolors.FAIL + "SYSTEM MESSAGE:" + bcolors.ENDC)
+	print(bcolors.OKGREEN + "Config file for namespace " + namespace_name + " at cluster " + cluster_name + " is created\n" + bcolors.ENDC)
 
 
 # This create namespace, service account, role , rolebindings and create a config file based on those infos.
-# accesskind is either admin, user or viewer (check repo for more detailed what they do)
-def generate_new_config(namespace_name,namespace_username,action,accesskind="",role_file_path="",resourcelimitfilepath=""):
+# access_kind is either admin, user or viewer (check repo for more detailed what they do)
+def generate_new_config(namespace_name,namespace_username,action,access_kind="",role_file_path="",resourcelimitfilepath=""):
 	# copy from the templates then replace the name of role referred in rolebinding.yaml.
 	exec_get_output(["cp","./templates/rolebinding.yaml","./"])
 
 	# use ruamel.yaml to take the name field from role.yaml to rolebindings
 	if role_file_path=="":
-		role_file_path = './templates/role-' + accesskind +'.yaml'  ## Read the Yaml File
-		access_file_name = "access-" + namespace_name + "-" + namespace_username + "-" + accesskind +".yaml"
+		role_file_path = './templates/role-' + access_kind +'.yaml'  ## Read the Yaml File
+		access_file_name = "access-" + namespace_name + "-" + namespace_username + "-" + access_kind +".yaml"
 	else:
 		access_file_name = "access-" + namespace_name + "-" + namespace_username + "-Custom"  +".yaml"
 
@@ -162,34 +191,41 @@ def case1():
 
 # Syntax "python ConstructAccess.py create --akind access_kind namespace1 namespace2 ... namespaceN"
 def case2():
-	accesskind = optsdict.get('--akind')
-	# If accesskind is None then we assume that it's the shorthand kind of input
-	if accesskind==None:
-		accesskind = optsdict.get('-a')
-	if accesskind==None:
-		print("Invalid input")
+	access_kind = optsdict.get('--akind')
+	# If access_kind is None then we assume that it's the shorthand kind of input
+	if access_kind not in all_access_kinds:
+		access_kind = optsdict.get('-a')
+	if access_kind not in all_access_kinds:
+		## print help
+		print("Do you mean this ?\n")
+		print(ErrorSyntax.get("create"))
+		print(ErrorDescription.get("create"))
+		print(bcolors.FAIL + "Invalid input, please double check syntax with the output above" + bcolors.ENDC)
 	else:
 		for elem in args:
 			namespace_username = elem + "-user"
-
-			generate_new_config(elem,namespace_username,sys.argv[1],accesskind)
+			generate_new_config(elem,namespace_username,sys.argv[1],access_kind)
 
 
 # Syntax "python ConstructAccess.py createEx --nsname namespace_name --akind access_kind username1  ... usernameN"
 def case3():
-	accesskind = optsdict.get('--akind')
-	# If accesskind is None then we assume that it's the shorthand kind of input
-	if accesskind==None:
-		accesskind = optsdict.get('-a')
+	access_kind = optsdict.get('--akind')
+	# If access_kind is None then we assume that it's the shorthand kind of input
+	if access_kind not in all_access_kinds:
+		access_kind = optsdict.get('-a')
 
 	namespace_name = optsdict.get('--nsname')
 	# If namespace_name is None then we assume that it's the shorthand kind of input
 	if namespace_name==None:
 		namespace_name = optsdict.get('-n')
-	if(accesskind==None or namespace_name==None):
-		print("Invalid input")
+	if(access_kind not in all_access_kinds or namespace_name==None):
+		## print help
+		print("Do you mean this ?\n")
+		print(ErrorSyntax.get("createEx"))
+		print(ErrorDescription.get("createEx"))
+		print(bcolors.FAIL + "Invalid input, please double check syntax with the output above" + bcolors.ENDC)
 	for elem in args:
-		generate_new_config(namespace_name,elem,sys.argv[1],accesskind)
+		generate_new_config(namespace_name,elem,sys.argv[1],access_kind)
 
 
 # Syntax "python ConstructAccess.py createCustomRole --rpath role_file_path namespace1 namespace2 ... namepspaceN"
@@ -199,7 +235,11 @@ def case4():
 	if rpath==None:
 		rpath=optsdict.get('-r')
 	if rpath==None:
-		print("Invalid input")
+		## print help
+		print("Do you mean this ?\n")
+		print(ErrorSyntax.get("createCustomRole"))
+		print(ErrorDescription.get("createCustomRole"))
+		print(bcolors.FAIL + "Invalid input, please double check syntax with the output above" + bcolors.ENDC)
 	for elem in args:
 		namespace_username = elem + "-user"
 		generate_new_config(elem,namespace_username,sys.argv[1],role_file_path=rpath)
@@ -216,7 +256,11 @@ def case5():
 	if rpath==None:
 		rpath=optsdict.get('-r')
 	if(rpath==None or namespace_name==None):
-		print("Invalid input")
+		## print help
+		print("Do you mean this ?\n")
+		print(ErrorSyntax.get("createExCustomeRole"))
+		print(ErrorDescription.get("createExCustomeRole"))
+		print(bcolors.FAIL + "Invalid input, please double check syntax with the output above" + bcolors.ENDC)
 	for elem in args:
 		generate_new_config(namespace_name,elem,sys.argv[1],role_file_path=rpath)
 
@@ -234,10 +278,31 @@ def case7():
 	if lpath==None:
 		lpath=optsdict.get('-l')
 	if lpath==None:
-		print("Invalid input")
+		## print help
+		print("Do you mean this ?\n")
+		print(ErrorSyntax.get("limit"))
+		print(ErrorDescription.get("limit"))
+		print(bcolors.FAIL + "Invalid input, please double check syntax with the output above" + bcolors.ENDC)
 	for elem in args:
 		limit_resources(lpath,elem)
 
+
+# Syntax "python ConstructAccess.py help " 
+# This print all commands syntax for you
+def case8():
+	print(bcolors.FAIL + "All commands: with python ConstructAccess.py plus these commands below\n" + bcolors.ENDC)
+	print(ErrorSyntax.get("create"))
+	print(ErrorDescription.get("create"))
+	print(ErrorSyntax.get("createEx"))
+	print(ErrorDescription.get("createEx"))
+	print(ErrorSyntax.get("createCustomRole"))
+	print(ErrorDescription.get("createCustomRole"))
+	print(ErrorSyntax.get("createExCustomeRole"))
+	print(ErrorDescription.get("createExCustomeRole"))
+	print(ErrorSyntax.get("recreate"))
+	print(ErrorDescription.get("recreate"))
+	print(ErrorSyntax.get("limit"))
+	print(ErrorDescription.get("limit"))
 
 # all flags and their shorthands, 
 # --nsname -n
@@ -247,13 +312,17 @@ def case7():
 # --lpath -l
 if __name__ == '__main__':
 	cases = {"merge":case1,"create":case2,"createEx":case3,"createCustomRole":case4,
-	"createExCustomRole":case5,"recreate":case6,"limit":case7}
+	"createExCustomRole":case5,"recreate":case6,"limit":case7,"help":case8}
 	try:
 		opts, args = getopt.getopt(sys.argv[2:], 'n:u:a:r:l:',['nsname=', 'uname=','akind=','rpath=','lpath='])
 	except getopt.GetoptError:
-		print("Input Error")
+		print(bcolors.FAIL + "Input Error" + bcolors.ENDC)
 		sys.exit(2)
 	optsdict = dict(opts)
+	if sys.argv[1] not in cases:
+		## print help
+		case8()
+		print(bcolors.FAIL + "Invalid input, please double check syntax with the output above" + bcolors.ENDC)
 	cases[sys.argv[1]]()
 
 

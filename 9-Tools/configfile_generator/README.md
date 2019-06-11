@@ -49,6 +49,8 @@ This requires the following to work.
 * pip install ruamel.yaml
 
 # User manual
+To print out all syntax 
+* python ConstructAccess.py help
 
 ## IMPORTANT
 When you use these command it will create the namespaces associated with the current cluster context. So if you have cluster1, cluster2, cluster3 and your namespace is on cluster1 then the functions will take the information from cluster1. So If you want to create a namespace on cluster2 you have to switch context to cluster2 first, then do these commands below.
@@ -68,6 +70,7 @@ this is the same as
 Meaning that we can interchange the flags and its argument with any other flag in any order you prefer, but user1 ... userN must still be at the end after the last flag argument.
 
 All functions call
+* help # This print out all syntax listed here in this readme in the terminal
 * create
 * createEx
 * createCustomRole
