@@ -38,10 +38,9 @@ contextname can be gotten from the previous command, check name column
 # Dependencies
 This requires the following to work. 
 
-* Gcloud
-* Kubectl
 * A working K8s cluster
-* ruamel.yaml API
+* Python 3 and ruamel module
+* kubectl
 
 ## Install ruamel.yaml
 [Link](https://yaml.readthedocs.io/en/latest/install.html) to doc. This tool is used for easily editing yaml file since almost everying things in K8s system can be output as a yaml file.
@@ -68,13 +67,27 @@ this is the same as
 * python ConstructAccess.py create --akind access_kind --nsname namespace_name user1 ... userN
 Meaning that we can interchange the flags and its argument with any other flag in any order you prefer, but user1 ... userN must still be at the end after the last flag argument.
 
-All flags and their short-hands
-* --nsname -a
-* --uname -b
-* --akind -c
-* --rpath -d
-* -rlpath -e
+All functions call
+* create
+* createEx
+* createCustomRole
+* createExCustomRole
+* merge
+* recreate
+* limit
 
+All flags and their shorthands
+* --nsname -n
+* --uname -u
+* --akind -a
+* --rpath -r
+* --lpath -l
+
+All the flags in the commands follow after this section can be replaced with shorthands without changing anything. Also the tool support both eith all flags are in long or short or a mixed of them, like for instance
+
+* python ConstructAccess.py createEx -a admin --nsname myns1 tailp 
+
+This will create an admin configfile for tailp in namespace myns1 . 
 ## Generating multiple config files for multiple namespaces with a particular accesskind within the namespaces
 
 * python ConstructAccess.py create --akind access_kind namespace1 namespace2 ... namespaceN
@@ -147,7 +160,7 @@ username depends on which method you use. If it's the "create" method then it wi
 
 ## Apply ResourcesQuota yaml over multiple namespace in one line
 
-* python ConstructAccess limitRes --rlpath filepath namespace1 namespace2 ... namespaceN
+* python ConstructAccess limit --lpath filepath namespace1 namespace2 ... namespaceN
 
 Here "filepath" is the path of the yaml file for restricting resources in the mentioned namespaces. Check templates to have a look at "quota-mem-cpu.yaml" as an example of such file. 
 

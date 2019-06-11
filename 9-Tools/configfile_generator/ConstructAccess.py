@@ -162,29 +162,63 @@ def case1():
 
 # Syntax "python ConstructAccess.py create --akind access_kind namespace1 namespace2 ... namespaceN"
 def case2():
-	type(optsdict)
-	for elem in args:
-		namespace_username = elem + "-user"
-		generate_new_config(elem,namespace_username,sys.argv[1],optsdict['--akind'])
+	accesskind = optsdict.get('--akind')
+	# If accesskind is None then we assume that it's the shorthand kind of input
+	if accesskind==None:
+		accesskind = optsdict.get('-a')
+	if accesskind==None:
+		print("Invalid input")
+	else:
+		for elem in args:
+			namespace_username = elem + "-user"
+
+			generate_new_config(elem,namespace_username,sys.argv[1],accesskind)
 
 
 # Syntax "python ConstructAccess.py createEx --nsname namespace_name --akind access_kind username1  ... usernameN"
 def case3():
+	accesskind = optsdict.get('--akind')
+	# If accesskind is None then we assume that it's the shorthand kind of input
+	if accesskind==None:
+		accesskind = optsdict.get('-a')
+
+	namespace_name = optsdict.get('--nsname')
+	# If namespace_name is None then we assume that it's the shorthand kind of input
+	if namespace_name==None:
+		namespace_name = optsdict.get('-n')
+	if(accesskind==None or namespace_name==None):
+		print("Invalid input")
 	for elem in args:
-		generate_new_config(optsdict['--nsname'],elem,sys.argv[1],optsdict['--akind'])
+		generate_new_config(namespace_name,elem,sys.argv[1],accesskind)
 
 
 # Syntax "python ConstructAccess.py createCustomRole --rpath role_file_path namespace1 namespace2 ... namepspaceN"
 def case4():
+	rpath=optsdict.get('--rpath')
+	# If rpath is None then we assume that it's the shorthand kind of input
+	if rpath==None:
+		rpath=optsdict.get('-r')
+	if rpath==None:
+		print("Invalid input")
 	for elem in args:
 		namespace_username = elem + "-user"
-		generate_new_config(elem,namespace_username,sys.argv[1],role_file_path=optsdict['--rpath'])
+		generate_new_config(elem,namespace_username,sys.argv[1],role_file_path=rpath)
 
 
 # Syntax "python ConstructAccess.py createExCustomeRole --nsname namespace_name --rpath role_file_path username1 username2 .... usernameN"
 def case5():
+	namespace_name = optsdict.get('--nsname')
+	# If namespace_name is None then we assume that it's the shorthand kind of input
+	if namespace_name==None:
+		namespace_name = optsdict.get('-n')
+	rpath=optsdict.get('--rpath')
+	# If rpath is None then we assume that it's the shorthand kind of input
+	if rpath==None:
+		rpath=optsdict.get('-r')
+	if(rpath==None or namespace_name==None):
+		print("Invalid input")
 	for elem in args:
-		generate_new_config(optsdict['--nsname'],elem,sys.argv[1],role_file_path=optsdict['--rpath'])
+		generate_new_config(namespace_name,elem,sys.argv[1],role_file_path=rpath)
 
 
 # Syntax "python ConstructAccess.py recreate --nsname namespace_name username1 username2 username3 ... usernameN"
@@ -193,24 +227,29 @@ def case6():
 		create_config(sys.argv[2],elem)
 
 
-# Syntax "python ConstructAccess.py limitRes --rlpath ResourceQuotafilepath namespace1 ... namespaceN"
+# Syntax "python ConstructAccess.py limit --lpath ResourceQuotafilepath namespace1 ... namespaceN"
 def case7():
-	print(args)
+	lpath=optsdict.get('--lpath')
+	# If lpath is None then we assume that it's the shorthand kind of input
+	if lpath==None:
+		lpath=optsdict.get('-l')
+	if lpath==None:
+		print("Invalid input")
 	for elem in args:
-		limit_resources(optsdict['--rlpath'],elem)
+		limit_resources(lpath,elem)
 
 
 # all flags and their shorthands, 
-# --nsname -a
-# --uname -b
-# --akind -c
-# --rpath -d
-# -rlpath -e
+# --nsname -n
+# --uname -u
+# --akind -a
+# --rpath -r
+# --lpath -l
 if __name__ == '__main__':
 	cases = {"merge":case1,"create":case2,"createEx":case3,"createCustomRole":case4,
-	"createExCustomRole":case5,"recreate":case6,"limitRes":case7}
+	"createExCustomRole":case5,"recreate":case6,"limit":case7}
 	try:
-		opts, args = getopt.getopt(sys.argv[2:], 'a:b:c:d:e:',['nsname=', 'uname=','akind=','rpath=','rlpath='])
+		opts, args = getopt.getopt(sys.argv[2:], 'n:u:a:r:l:',['nsname=', 'uname=','akind=','rpath=','lpath='])
 	except getopt.GetoptError:
 		print("Input Error")
 		sys.exit(2)
