@@ -39,7 +39,7 @@ contextname can be gotten from the previous command, check name column
 This requires the following to work. 
 
 * A working K8s cluster
-* Python 3 and ruamel module
+* Python 2 and ruamel module
 * kubectl
 
 ## Install ruamel.yaml
