@@ -64,9 +64,9 @@ More details check the specified yaml file in forms folder for roles specificati
 
 ### CLI syntax
 for instance creating a user with a specified access kind on a aldready existed namespace
-* python ConstructAccess.py -m create --nsname namespace_name --akind access_kind user1 ... userN
+* python ConstructAccess.py -m create --nsname namespace_name --akind access_kind namespace1 namespace2 ... namespaceN
 this is the same as 
-* python ConstructAccess.py -m create --akind access_kind --nsname namespace_name user1 ... userN
+* python ConstructAccess.py -m create --akind access_kind --nsname namespace_name namespace1 namespace2 ... namespaceN
 Meaning that we can interchange the flags and its argument with any other flag in any order you prefer, but user1 ... userN must still be at the end after the last flag argument.
 
 All functions call
@@ -137,11 +137,11 @@ Just like before with the create method, this will create a folder called "names
 
 Just like the createEx command instead of the standard access kinds specified here, you can use your own custom privilege by providing a role.yaml file and Also an access file will be created in the "namespace_name" folder.
 
-## Generate a user with different accesskind in multiple namespaces.
+## Add roles for an existing user in different namespaces
 
-* python ConstructAccess.py -m createMultiNsAkinds -u user_name -n namespace_1 -a access_kind_for_namespace_1 -n namespace_2 -a access_kind_for_namespace_2 
+* python ConstructAccess.py -m addRoles -u sa_name -s sa_namespace -n new_ns -a access_kind_new_ns
 
-This command is used to create a user with different roles with different namespaces. Syntax is -n namepspace_1 user will have access kind namespace_1 , same logic for namespaceN. -u username is used to specify service account name. 
+To find your sa_name , `kubectl get sa -n namespace_name` . `sa_namespace` is the name of the namespace the sa_user is in. This will add a new role for the user in the `new_ns` namespace with the provided `access_kind_new_ns` access kind.
 
 To clean up best to have the user who create and delete using the yaml file produced.
 

@@ -20,13 +20,15 @@ class MultipleOption(Option):
         else:
             Option.take_action(self, action, dest, opt, value, values, parser)
 
+# --method -m
 # --nsname -n
 # --uname -u
+# --unsname -uns
 # --akind -a
 # --rpath -r
 # --lpath -l
 def option_parse_init():
-	long_commands = ('nsname','uname','akind','rpath','lpath')
+	long_commands = ('nsname','uname','akind','rpath','lpath','unsname')
 	short_commands = {'a':'akind','u':'uname'}
 	parser = OptionParser(option_class=MultipleOption)
 
@@ -54,11 +56,14 @@ def option_parse_init():
 	              action="extend", type="string",
 	              dest='rpath',
 	              help='custom role file path to use')
-
 	parser.add_option('-l', '--lpath', 
 	              action="extend", type="string",
 	              dest='lpath',
 	              help='lpath resource quota limit file path to use')
+	parser.add_option('-s','--unsname', 
+	              action="extend", type="string",
+	              dest='unsname',
+	              help='namespace name of the service account user')	
 
 	return parser
 
@@ -219,27 +224,16 @@ def generate_new_config(namespace_name,namespace_username,action,access_kind="",
 	# Cleaning up 
 	exec_get_output(["rm","-rf","sa.yaml", "role.yaml", "rolebinding.yaml"])
 
-
-def generate_new_config_multiNsAkinds(sa_username,ns_list,akind_list) :
+# Adding roles in other namespaces for an existing service account.
+# No config file will be generated, the old one can be reused.
+def addRoles(sa_username,sa_user_namespace_name,ns_list,akind_list) :
 	if len(ns_list) != len(akind_list) :
 		print ("Error number of specified namespaces and number of access kinds are not equal")
 		return ""
 
-	files_to_append = ["./sa.yaml"]
+	files_to_append = []
+	access_file_name = "multiNsAccess-" + sa_username + '-' + sa_user_namespace_name + ".yaml"
 
-	# Create a service account
-	sa_user_namespace_name = ns_list[0]
-	namespace_username = sa_user_namespace_name + "-0" 
-	access_kind = akind_list[0]
-
-	access_file_name = "multiNsAccess-" + sa_user_namespace_name + "-" + namespace_username + "-" + access_kind +".yaml"
-
-	exec_get_output(["cp","./templates/sa.yaml","./sa.yaml"])
-	replace_file_word_with_input("./sa.yaml",sa_username,"SA_USERNAME")
-	replace_file_word_with_input("./sa.yaml",sa_user_namespace_name,"NAMESPACE_NAME")
-
-	print(ns_list)
-	print(akind_list)
 	for i in range(0,len(ns_list)):
 		namespace_name = ns_list.pop(0)
 		namespace_username = namespace_name + "-" + str(i)
@@ -283,16 +277,22 @@ def generate_new_config_multiNsAkinds(sa_username,ns_list,akind_list) :
 		replace_file_word_with_input(rolebinding_file_path,namespace_name,"NAMESPACE_NAME")
 		replace_file_word_with_input(rolebinding_file_path,namespace_username,"NAMESPACE_USERNAME")
 
-
-
 	# After editing with ruamel.yaml merge everything to a single file and apply.
 	merge_files(files_to_append,access_file_name)
 	if(exec_get_output('[ -d '+ "multiNsAccess-" + sa_user_namespace_name + ' && echo "exist"',True)!="exist"):
 		exec_get_output("mkdir " + "multiNsAccess-" + sa_user_namespace_name,True)
+	else:
+		# do nothing
+		print()
 	print(exec_get_output(["kubectl","create","-f",access_file_name]))
-	exec_get_output("mv " + access_file_name + " multiNsAccess-" + sa_user_namespace_name,True)
+	# if file exists then append it.
+	if os.path.isfile("multiNsAccess-" + sa_user_namespace_name + "/" + access_file_name) :
+		files = ["multiNsAccess-" + sa_user_namespace_name + "/" + access_file_name]
+		files.append(access_file_name)
+		merge_files(files_to_append,"multiNsAccess-" + sa_user_namespace_name + "/" + access_file_name)
+	else:
+		exec_get_output("mv " + access_file_name + " multiNsAccess-" + sa_user_namespace_name,True)
 
-	create_config(sa_user_namespace_name,sa_username)
 	# Cleaning up 
 	to_be_del = ' '.join(files_to_append) 
 	exec_get_output("rm -rf sa.yaml " + to_be_del,True)
@@ -421,22 +421,25 @@ def case7():
 	for elem in args:
 		limit_resources(lpath,elem)
 
-# Syntax python ConstructAccess.py createUserMultiNsAkinds -u user_name -n namespace_1 -a access_kind_for_namespace_1 -n namespace_2 -a access_kind_for_namespace_2 
+# Syntax python ConstructAccess.py -m addRoles -u sa_user_name -s sa_user_namespace -n namespace_1 -n namespace_2 -a access_kind_for_namespace_2 
 def case8():
 	sa_username = optsdict['uname'][0]
+	sa_user_namespace_name = optsdict['unsname'][0]
 	ns_list = optsdict['nsname']
 	akind_list = optsdict['akind']
-	generate_new_config_multiNsAkinds(sa_username,ns_list,akind_list)
+	addRoles(sa_username,sa_user_namespace_name,ns_list,akind_list)
+
 
 # all flags and their shorthands, 
 # --nsname -n
 # --uname -u
+# --unsname -uns
 # --akind -a
 # --rpath -r
 # --lpath -l
 if __name__ == '__main__':
 	cases = {"help":case0,"merge":case1,"create":case2,"createEx":case3,"createCustomRole":case4,
-	"createExCustomRole":case5,"recreate":case6,"limit":case7,"createMultiNsAkinds":case8}
+	"createExCustomRole":case5,"recreate":case6,"limit":case7,"addRoles":case8}
 
 	parser = option_parse_init()
 	OPTIONS, args = parser.parse_args()
@@ -449,17 +452,3 @@ if __name__ == '__main__':
 		print(bcolors.FAIL + "Invalid input, please double check syntax with the output above" + bcolors.ENDC)
 	else:
 		cases[optsdict["method"][0]]()
-
-
-	# try:
-	# 	opts, args = getopt.getopt(sys.argv[2:], 'n:u:a:r:l:',['nsname=', 'uname=','akind=','rpath=','lpath='])
-	# except getopt.GetoptError:
-	# 	print(bcolors.FAIL + "Input Error" + bcolors.ENDC)
-	# 	sys.exit(2)
-	# optsdict = dict(opts)
-	# print(optsdict)
-	# if sys.argv[1] not in cases:
-	# 	## print help
-	# 	case0()
-	# 	print(bcolors.FAIL + "Invalid input, please double check syntax with the output above" + bcolors.ENDC)
-	# cases[sys.argv[1]]()
