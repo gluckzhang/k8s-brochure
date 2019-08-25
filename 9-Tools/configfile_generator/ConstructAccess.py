@@ -438,7 +438,7 @@ def case8():
 # --rpath -r
 # --lpath -l
 if __name__ == '__main__':
-	cases = {"help":case0,"merge":case1,"create":case2,"createEx":case3,"createCustomRole":case4,
+	methods = {"help":case0,"merge":case1,"create":case2,"createEx":case3,"createCustomRole":case4,
 	"createExCustomRole":case5,"recreate":case6,"limit":case7,"addRoles":case8}
 
 	parser = option_parse_init()
@@ -446,9 +446,9 @@ if __name__ == '__main__':
 	optsdict = vars(OPTIONS)
 	method_input = optsdict["method"] or ['']
 	print(optsdict)
-	if method_input[0] not in cases:
+	if method_input[0] not in methods:
 		## print help
 		case0()
 		print(bcolors.FAIL + "Invalid input, please double check syntax with the output above" + bcolors.ENDC)
 	else:
-		cases[optsdict["method"][0]]()
+		methods[optsdict["method"][0]]()
