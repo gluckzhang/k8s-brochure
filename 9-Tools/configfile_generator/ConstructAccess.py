@@ -83,7 +83,7 @@ args = []
 opts = []
 optsdict = {}
 all_access_kinds = ["admin","user","viewer"]
-# this is for case0, also known as the help function or printing out the correct text at a certain error.
+# this is for help, also known as the help function or printing out the correct text at a certain error.
 ErrorSyntax = {"create": "create -a access_kind namespace1 ... namespaceN",
 	"createEx": "createEx -n namespace_name -a access_kind username1  ... usernameN",
 	"createCustomRole": "createCustomRole -r role_file_path namespace1 ... namepspaceN",
@@ -318,7 +318,7 @@ def limit_resources(resourcelimitfilepath,namespace_name):
 
 # Syntax "python ConstructAccess.py help " 
 # This print all commands syntax for you
-def case0():
+def help():
 	print(bcolors.FAIL + "All commands: with python ConstructAccess.py plus these commands below\n" + bcolors.ENDC)
 	print(ErrorSyntax.get("create"))
 	print(ErrorDescription.get("create"))
@@ -334,12 +334,12 @@ def case0():
 	print(ErrorDescription.get("limit"))
 
 # Syntax "python ConstructAccess.py merge file1 file2 file3"
-def case1():
+def merge():
 	merge_configs(list(sys.argv[2:]))
 
 
 # Syntax "python ConstructAccess.py create --akind access_kind namespace1 namespace2 ... namespaceN"
-def case2():
+def create():
 	access_kind = optsdict.get('akind')[0]
 	action = optsdict.get('method')[0]
 	if access_kind not in all_access_kinds:
@@ -355,7 +355,7 @@ def case2():
 
 
 # Syntax "python ConstructAccess.py createEx --nsname namespace_name --akind access_kind username1  ... usernameN"
-def case3():
+def createEx():
 	access_kind = optsdict.get('akind')[0]
 	action = optsdict.get('method')[0]
 	namespace_name = optsdict.get('nsname')[0]
@@ -373,7 +373,7 @@ def case3():
 
 
 # Syntax "python ConstructAccess.py createCustomRole --rpath role_file_path namespace1 namespace2 ... namepspaceN"
-def case4():
+def createCustomRole():
 	rpath=optsdict.get('rpath')[0]
 	action = optsdict.get('method')[0]
 	if rpath==None:
@@ -388,7 +388,7 @@ def case4():
 
 
 # Syntax "python ConstructAccess.py createExCustomeRole --nsname namespace_name --rpath role_file_path username1 username2 .... usernameN"
-def case5():
+def createExCustomRole():
 	namespace_name = optsdict.get('nsname')[0]
 	rpath=optsdict.get('rpath')[0]
 	action = optsdict.get('method')[0]
@@ -403,13 +403,13 @@ def case5():
 
 
 # Syntax "python ConstructAccess.py recreate --nsname namespace_name username1 username2 username3 ... usernameN"
-def case6():
+def recreate():
 	for elem in args:
 		create_config(sys.argv[2],elem)
 
 
 # Syntax "python ConstructAccess.py limit --lpath ResourceQuotafilepath namespace1 ... namespaceN"
-def case7():
+def limit():
 	lpath=optsdict.get('lpath')
 	action = optsdict.get('method')[0]
 	if lpath==None:
@@ -422,7 +422,7 @@ def case7():
 		limit_resources(lpath,elem)
 
 # Syntax python ConstructAccess.py -m addRoles -u sa_user_name -s sa_user_namespace -n namespace_1 -n namespace_2 -a access_kind_for_namespace_2 
-def case8():
+def addRoles():
 	sa_username = optsdict['uname'][0]
 	sa_user_namespace_name = optsdict['unsname'][0]
 	ns_list = optsdict['nsname']
@@ -438,8 +438,8 @@ def case8():
 # --rpath -r
 # --lpath -l
 if __name__ == '__main__':
-	methods = {"help":case0,"merge":case1,"create":case2,"createEx":case3,"createCustomRole":case4,
-	"createExCustomRole":case5,"recreate":case6,"limit":case7,"addRoles":case8}
+	methods = {"help":help,"merge":merge,"create":create,"createEx":createEx,"createCustomRole":createCustomRole,
+	"createExCustomRole":createExCustomRole,"recreate":recreate,"limit":limit,"addRoles":addRoles}
 
 	parser = option_parse_init()
 	OPTIONS, args = parser.parse_args()
@@ -448,7 +448,7 @@ if __name__ == '__main__':
 	print(optsdict)
 	if method_input[0] not in methods:
 		## print help
-		case0()
+		help()
 		print(bcolors.FAIL + "Invalid input, please double check syntax with the output above" + bcolors.ENDC)
 	else:
 		methods[optsdict["method"][0]]()
