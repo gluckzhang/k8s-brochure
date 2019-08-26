@@ -30,7 +30,7 @@ A: In bash terminal
 
 This will give you all available contexts for your config file to switch to. Note that only "those" contexts in your config file so if you want to access a cluster or a namespace not in your config file you have to acquire the config file containing that context(ask the guy who can give you the config file).
 
-* kubectl config set-context contextname
+* kubectl config use-context contextname
 
 contextname can be gotten from the previous command, check name column
 
@@ -64,9 +64,9 @@ More details check the specified yaml file in forms folder for roles specificati
 
 ### CLI syntax
 for instance creating a user with a specified access kind on a aldready existed namespace
-* python ConstructAccess.py create --nsname namespace_name --akind access_kind user1 ... userN
+* python ConstructAccess.py -m create --nsname namespace_name --akind access_kind namespace1 namespace2 ... namespaceN
 this is the same as 
-* python ConstructAccess.py create --akind access_kind --nsname namespace_name user1 ... userN
+* python ConstructAccess.py -m create --akind access_kind --nsname namespace_name namespace1 namespace2 ... namespaceN
 Meaning that we can interchange the flags and its argument with any other flag in any order you prefer, but user1 ... userN must still be at the end after the last flag argument.
 
 All functions call
@@ -80,6 +80,7 @@ All functions call
 * limit
 
 All flags and their shorthands
+* --method -m
 * --nsname -n
 * --uname -u
 * --akind -a
@@ -88,18 +89,18 @@ All flags and their shorthands
 
 All the flags in the commands follow after this section can be replaced with shorthands without changing anything. Also the tool support both eith all flags are in long or short or a mixed of them, like for instance
 
-* python ConstructAccess.py createEx -a admin --nsname myns1 tailp 
+* python ConstructAccess.py -m createEx -a admin --nsname myns1 tailp 
 
 This will create an admin configfile for tailp in namespace myns1 . 
 ## Generating multiple config files for multiple namespaces with a particular accesskind within the namespaces
 
-* python ConstructAccess.py create --akind access_kind namespace1 namespace2 ... namespaceN
+* python ConstructAccess.py -m create -a access_kind namespace1 namespace2 ... namespaceN
 
 This will create N config files for N different namespaces to be used. Also, the usernames created by this method is according to the format "namespaceN-user", so if your namespace is called tailp, then it will be "tailp-user" as username. 
 
 After calling this method an access yaml with the format "access-NAMESPACENAME-NAMESPACE_USERNAME-accesskind.yaml"  will be created in a folder with name "NAMESPACENAME" for the sake of deletion for each namespaceN specified. For instance with
 
-* python ConstructAccess.py create --akind admin myns1 myns2
+* python ConstructAccess.py -m create -a admin myns1 myns2
 
 This will create 2 folders, one named myns1 and the other myns2 . In myns1 an access file called "access-myns1-myns1-user-admin.yaml" will be created. The same logic goes for myns2.
 
@@ -108,7 +109,7 @@ If you want to remove the user using the created config file just go in the NAME
 
 ## Generating multiple users configs for an already existed namespace
 
-* python ConstructAccess.py createEx --nsname namespace_name --akind accesskind username1  ... usernameN
+* python ConstructAccess.py -m createEx -n namespace_name -a accesskind username1  ... usernameN
 
 This will create N config files for N different users within the already existed namespace_name with the specified accesskind. Note that each username should be unique and not the same as other already existed. 
 
@@ -124,7 +125,7 @@ Also like the create method, this will also create an access yaml "access-NAMESP
 
 ## Generating multiple namespaces with a custom access kind instead of the one specified
 
-* python ConstructAccess.py createCustomRole --rpath role_file_path namespace1 namespace2 ... namepspaceN
+* python ConstructAccess.py -m createCustomRole --rpath role_file_path namespace1 namespace2 ... namepspaceN
 
 This is like the normal create command with the difference that you have to provide a role.yaml file for your creating a custom privilege instead of using the access kinds(admin,user,viewer) like above. Example for a role.yaml file can be found in forms folder of this repo(role-admin.yaml for instance, or visit K8s page for more details)
 
@@ -132,10 +133,17 @@ Just like before with the create method, this will create a folder called "names
 
 ## Generating multiple user configs for an already existed namespace with a custom access kind
 
-* python ConstructAccess.py createExCustomeRole --nsname namespace_name --rpath role_file_path username1 username2 .... usernameN
+* python ConstructAccess.py -m createExCustomeRole -n namespace_name --rpath role_file_path username1 username2 .... usernameN
 
 Just like the createEx command instead of the standard access kinds specified here, you can use your own custom privilege by providing a role.yaml file and Also an access file will be created in the "namespace_name" folder.
 
+## Add roles for an existing user in different namespaces
+
+* python ConstructAccess.py -m addRoles -u sa_name -s sa_namespace -n new_ns -a access_kind_new_ns
+
+To find your sa_name , `kubectl get sa -n namespace_name` . `sa_namespace` is the name of the namespace the sa_user is in. This will add a new role for the user in the `new_ns` namespace with the provided `access_kind_new_ns` access kind.
+
+To clean up best to have the user who create and delete using the yaml file produced.
 
 ## Merge config files
 
@@ -145,7 +153,7 @@ Note: Here I assume that you only want to generate the merged config file with t
 
 Place all the config files you want to merge in this repo, also known as "K8sNamespaceRestrictedAccess" folder after cloning, then run
 
-* python ConstructAccess.py merge configfile_1 configfile_2 .... configfile_N
+* python ConstructAccess.py -m merge configfile_1 configfile_2 .... configfile_N
 
 It will generate a file called "mergedconfig" to use. Now the user can switching contexts and moving to different namespaces after setting the config file.
 
@@ -153,7 +161,7 @@ It will generate a file called "mergedconfig" to use. Now the user can switching
 
 This is neccessary since the token for the service account will be expired after some time so, Kubernetes will automatically refresh this or maybe you lost the config file and want to re-aquire it. Therefore this also has a function which re-fetch the config file for you (with the updated token and other updated informations ofcourse). This will refetch N configfiles for N specified users.
 
-* python ConstructAccess.py recreate namespace_name username1 username2 ... usernameN
+* python ConstructAccess.py -m recreate namespace_name username1 username2 ... usernameN
 
 namespace_name can be found with 
 * kubectl get namespaces
