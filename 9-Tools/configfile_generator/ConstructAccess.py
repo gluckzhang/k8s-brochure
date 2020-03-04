@@ -368,8 +368,9 @@ def createEx():
 		print(ErrorSyntax.get("createEx"))
 		print(ErrorDescription.get("createEx"))
 		print(bcolors.FAIL + "Invalid input, please double check syntax with the output above" + bcolors.ENDC)
-	for elem in args:
-		generate_new_config(namespace_name,elem,action,access_kind)
+	else:
+		for elem in args:
+			generate_new_config(namespace_name,elem,action,access_kind)
 
 
 # Syntax "python ConstructAccess.py createCustomRole --rpath role_file_path namespace1 namespace2 ... namepspaceN"
@@ -382,9 +383,10 @@ def createCustomRole():
 		print(ErrorSyntax.get("createCustomRole"))
 		print(ErrorDescription.get("createCustomRole"))
 		print(bcolors.FAIL + "Invalid input, please double check syntax with the output above" + bcolors.ENDC)
-	for elem in args:
-		namespace_username = elem + "-user"
-		generate_new_config(elem,namespace_username,action,role_file_path=rpath)
+	else:
+		for elem in args:
+			namespace_username = elem + "-user"
+			generate_new_config(elem,namespace_username,action,role_file_path=rpath)
 
 
 # Syntax "python ConstructAccess.py createExCustomeRole --nsname namespace_name --rpath role_file_path username1 username2 .... usernameN"
@@ -398,8 +400,9 @@ def createExCustomRole():
 		print(ErrorSyntax.get("createExCustomeRole"))
 		print(ErrorDescription.get("createExCustomeRole"))
 		print(bcolors.FAIL + "Invalid input, please double check syntax with the output above" + bcolors.ENDC)
-	for elem in args:
-		generate_new_config(namespace_name,elem,action,role_file_path=rpath)
+	else:
+		for elem in args:
+			generate_new_config(namespace_name,elem,action,role_file_path=rpath)
 
 
 # Syntax "python ConstructAccess.py recreate --nsname namespace_name username1 username2 username3 ... usernameN"
@@ -418,8 +421,9 @@ def limit():
 		print(ErrorSyntax.get("limit"))
 		print(ErrorDescription.get("limit"))
 		print(bcolors.FAIL + "Invalid input, please double check syntax with the output above" + bcolors.ENDC)
-	for elem in args:
-		limit_resources(lpath,elem)
+	else:
+		for elem in args:
+			limit_resources(lpath,elem)
 
 # Syntax python ConstructAccess.py -m addRoles -u sa_user_name -s sa_user_namespace -n namespace_1 -n namespace_2 -a access_kind_for_namespace_2 
 def addRoles():
