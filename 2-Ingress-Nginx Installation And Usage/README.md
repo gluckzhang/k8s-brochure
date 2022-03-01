@@ -41,6 +41,10 @@ When we deploy NGINX Ingress Controller in our cluster, the pods also had issues
 $ kubectl apply -f fake-ingress-nginx.svc.yaml
 ```
 
+## Disable Default Backend's Request Handling on Direct Public IPs
+
+More discussions can be found here: [Can't disable default backend or handle direct public IP Request #971](https://github.com/nginxinc/kubernetes-ingress/issues/971)
+
 # Expose The Ingress Controller
 
 Because we couldn't use LoadBalancer service type in our own cluster, we have to use a NodePort service to expose the ingress controller. Then you could use `http(s)://<your-domain-name>:<port-number>` to visit your specific services.
